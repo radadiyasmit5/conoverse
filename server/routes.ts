@@ -3,26 +3,74 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { insertUserSchema, insertConversationSchema, insertMessageSchema } from "@shared/schema";
 import { z } from "zod";
+import OpenAI from "openai";
+
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY
+});
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  // Authentication routes
-  app.post("/api/auth/signup", async (req, res) => {
+  // Chat route
+  app.post("/api/chat", async (req, res) => {
     try {
-      const user = insertUserSchema.parse(req.body);
-      const existingUser = await storage.getUserByUsername(user.username);
+      const { prompt, model = "gpt-3.5-turbo" } = req.body;
 
-      if (existingUser) {
-        return res.status(400).json({ error: "Username already exists" });
-      }
+      const completion = await openai.chat.completions.create({
+        model,
+        messages: [{ role: "user", content: prompt }],
+        temperature: 0.7,
+      });
 
-      const newUser = await storage.createUser(user);
-      res.status(201).json({ user: newUser });
-    } catch (error) {
-      if (error instanceof z.ZodError) {
-        return res.status(400).json({ error: error.message });
-      }
-      res.status(500).json({ error: "Internal server error" });
+      const response = completion.choices[0].message.content;
+
+      res.json({ response });
+    } catch (error: any) {
+      console.error("OpenAI Error:", error);
+      res.status(500).json({ 
+        error: "Error processing chat request",
+        details: error.message 
+      });
     }
+  });
+
+  // Agent routes
+  app.post("/api/agents", async (req, res) => {
+    try {
+      const { name, description, prompt } = req.body;
+      const agent = {
+        id: Date.now(),
+        name,
+        description,
+        prompt,
+        createdAt: new Date()
+      };
+
+      res.status(201).json({ agent });
+    } catch (error: any) {
+      res.status(500).json({ 
+        error: "Failed to create agent",
+        details: error.message 
+      });
+    }
+  });
+
+  app.get("/api/agents", (_req, res) => {
+    const agents = [
+      { 
+        id: 1, 
+        name: "General Assistant", 
+        description: "A helpful AI assistant for general tasks",
+        createdAt: new Date()
+      },
+      { 
+        id: 2, 
+        name: "Code Helper", 
+        description: "Specialized in programming assistance",
+        createdAt: new Date()
+      }
+    ];
+
+    res.json({ agents });
   });
 
   // Conversation routes

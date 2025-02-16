@@ -27,7 +27,8 @@ const Chat = () => {
       });
 
       if (!response.ok) {
-        throw new Error("Failed to send message");
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to send message");
       }
 
       return response.json();
@@ -44,16 +45,17 @@ const Chat = () => {
       ]);
       queryClient.invalidateQueries({ queryKey: ["/api/conversations"] });
     },
-    onError: () => {
+    onError: (error: Error) => {
       toast({
         title: "Error",
-        description: "Failed to send message. Please try again.",
+        description: error.message || "Failed to send message. Please try again.",
         variant: "destructive",
       });
     },
   });
 
   const handleSendMessage = (content: string, model: string) => {
+    // Add user message immediately
     setMessages((prev) => [
       ...prev,
       {
@@ -64,7 +66,19 @@ const Chat = () => {
       },
     ]);
 
+    // Send to API
     sendMessageMutation.mutate({ content, model });
+  };
+
+  const handleNewChat = () => {
+    setMessages([
+      {
+        id: 1,
+        content: "Hello! How can I help you today?",
+        isUser: false,
+        timestamp: new Date(),
+      },
+    ]);
   };
 
   return (
@@ -76,6 +90,7 @@ const Chat = () => {
       <ChatWindow 
         messages={messages} 
         onSendMessage={handleSendMessage}
+        onNewChat={handleNewChat}
         isLoading={sendMessageMutation.isPending}
       />
     </motion.div>
