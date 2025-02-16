@@ -16,9 +16,9 @@ export const useAnimation = (options: AnimationOptions = {}) => {
       await animate(
         scope.current,
         options.animate || { opacity: [0, 1], y: [20, 0] },
-        { 
+        {
           duration: options.duration || 0.3,
-          delay: options.delay || 0 
+          delay: options.delay || 0
         }
       );
     };

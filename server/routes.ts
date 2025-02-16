@@ -26,9 +26,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json({ response });
     } catch (error: any) {
       console.error("OpenAI Error:", error);
-      res.status(500).json({ 
+      res.status(500).json({
         error: "Error processing chat request",
-        details: error.message 
+        details: error.message
       });
     }
   });
@@ -43,9 +43,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (error instanceof z.ZodError) {
         return res.status(400).json({ error: error.message });
       }
-      res.status(500).json({ 
+      res.status(500).json({
         error: "Failed to create agent",
-        details: error.message 
+        details: error.message
       });
     }
   });
@@ -55,9 +55,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const agents = await storage.getAgents();
       res.json({ agents });
     } catch (error: any) {
-      res.status(500).json({ 
+      res.status(500).json({
         error: "Failed to fetch agents",
-        details: error.message 
+        details: error.message
       });
     }
   });
@@ -70,9 +70,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       res.json({ agent });
     } catch (error: any) {
-      res.status(500).json({ 
+      res.status(500).json({
         error: "Failed to fetch agent",
-        details: error.message 
+        details: error.message
       });
     }
   });
@@ -115,9 +115,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/conversations/:conversationId/messages", async (req, res) => {
     try {
       const conversationId = parseInt(req.params.conversationId);
-      const message = insertMessageSchema.parse({ 
-        ...req.body, 
-        conversationId 
+      const message = insertMessageSchema.parse({
+        ...req.body,
+        conversationId
       });
       const newMessage = await storage.createMessage(message);
       res.status(201).json({ message: newMessage });

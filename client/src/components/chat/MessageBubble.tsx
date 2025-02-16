@@ -16,13 +16,13 @@ interface MessageBubbleProps {
 
 const MessageBubble = ({ message, index }: MessageBubbleProps) => {
   const bubbleVariants = {
-    initial: { 
-      opacity: 0, 
+    initial: {
+      opacity: 0,
       y: 20,
-      scale: 0.9 
+      scale: 0.9
     },
-    animate: { 
-      opacity: 1, 
+    animate: {
+      opacity: 1,
       y: 0,
       scale: 1,
       transition: {
@@ -32,8 +32,8 @@ const MessageBubble = ({ message, index }: MessageBubbleProps) => {
         delay: index * 0.1
       }
     },
-    exit: { 
-      opacity: 0, 
+    exit: {
+      opacity: 0,
       scale: 0.9,
       transition: { duration: 0.2 }
     },
@@ -69,9 +69,8 @@ const MessageBubble = ({ message, index }: MessageBubbleProps) => {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.2 }}
-        className={`text-xs text-foreground/60 mt-1 ${
-          message.isUser ? "text-right" : "text-left"
-        }`}
+        className={`text-xs text-foreground/60 mt-1 ${message.isUser ? "text-right" : "text-left"
+          }`}
       >
         {format(message.timestamp, "HH:mm")}
       </motion.div>

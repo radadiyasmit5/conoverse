@@ -36,7 +36,7 @@ const Sidebar = () => {
 
         <ScrollArea className="flex-1 -mx-4 px-4">
           <nav className="space-y-2">
-            <NavButton 
+            <NavButton
               href="/chat"
               icon={<MessageSquare className="w-4 h-4" />}
               label="Conversations"
@@ -49,7 +49,7 @@ const Sidebar = () => {
               active={location === "/agents"}
             />
             <NavButton
-              href="/settings" 
+              href="/settings"
               icon={<Settings className="w-4 h-4" />}
               label="Settings"
               active={location === "/settings"}
@@ -72,7 +72,7 @@ const Sidebar = () => {
   );
 };
 
-const NavButton = ({ href, icon, label, active }: { 
+const NavButton = ({ href, icon, label, active }: {
   href: string;
   icon: React.ReactNode;
   label: string;
@@ -82,11 +82,10 @@ const NavButton = ({ href, icon, label, active }: {
     <motion.a
       whileHover={{ scale: 1.02 }}
       whileTap={{ scale: 0.98 }}
-      className={`flex items-center gap-2 px-3 py-2 rounded-md transition-colors ${
-        active 
+      className={`flex items-center gap-2 px-3 py-2 rounded-md transition-colors ${active
           ? 'bg-purple-600/20 text-purple-400'
           : 'hover:bg-purple-600/10 text-foreground/80'
-      }`}
+        }`}
     >
       {icon}
       <span>{label}</span>

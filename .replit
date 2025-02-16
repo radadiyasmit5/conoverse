@@ -40,3 +40,4 @@ task = "packager.installForAll"
 task = "shell.exec"
 args = "npm run dev"
 waitForPort = 5000
+DATABASE_URL=ostgresql://neondb_owner:npg_ZdXP8tEgnz7f@ep-white-bonus-a5jqlp0z-pooler.us-east-2.aws.neon.tech/neondb?sslmode=require

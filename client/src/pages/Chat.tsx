@@ -87,8 +87,8 @@ const Chat = () => {
       animate={{ opacity: 1 }}
       className="flex-1 p-6"
     >
-      <ChatWindow 
-        messages={messages} 
+      <ChatWindow
+        messages={messages}
         onSendMessage={handleSendMessage}
         onNewChat={handleNewChat}
         isLoading={sendMessageMutation.isPending}
