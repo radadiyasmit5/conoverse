@@ -1,8 +1,8 @@
 import { motion } from "framer-motion";
+import { useLocation, Link } from "wouter";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
 import { MessageSquare, Settings, Users, PlusCircle } from "lucide-react";
-import { Link, useLocation } from "wouter";
 
 const sidebarAnimation = {
   open: { x: 0, opacity: 1 },
@@ -10,7 +10,12 @@ const sidebarAnimation = {
 };
 
 const Sidebar = () => {
-  const [location] = useLocation();
+  const [location, setLocation] = useLocation();
+
+  const handleNewChat = () => {
+    setLocation('/chat');
+    // You might want to trigger a reset of the chat state here
+  };
 
   return (
     <motion.div
@@ -55,6 +60,7 @@ const Sidebar = () => {
             <Button
               variant="secondary"
               className="w-full justify-start gap-2 bg-purple-600/10 hover:bg-purple-600/20"
+              onClick={handleNewChat}
             >
               <PlusCircle className="w-4 h-4" />
               New Chat
