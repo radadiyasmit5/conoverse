@@ -4,6 +4,7 @@ import { queryClient } from "./lib/queryClient";
 import { Toaster } from "@/components/ui/toaster";
 import Sidebar from "@/components/layout/Sidebar";
 import Chat from "@/pages/Chat";
+import Agents from "@/pages/Agents";
 import NotFound from "@/pages/not-found";
 import "./styles/animations.css";
 
@@ -15,6 +16,7 @@ function Router() {
         <Switch>
           <Route path="/" component={Chat} />
           <Route path="/chat" component={Chat} />
+          <Route path="/agents" component={Agents} />
           <Route component={NotFound} />
         </Switch>
       </main>
