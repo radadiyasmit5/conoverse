@@ -3,8 +3,17 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useTheme } from "@/lib/theme";
+import { useEffect } from "react";
 
 const Settings = () => {
+  const { theme, setTheme } = useTheme();
+
+  useEffect(() => {
+    // Initialize theme on component mount
+    setTheme(theme);
+  }, []);
+
   return (
     <motion.div
       initial={{ opacity: 0 }}
@@ -21,9 +30,21 @@ const Settings = () => {
             <CardTitle>Appearance</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="flex items-center justify-between">
-              <Label htmlFor="dark-mode">Dark Mode</Label>
-              <Switch id="dark-mode" defaultChecked />
+            <div className="space-y-2">
+              <Label>Theme</Label>
+              <Select
+                value={theme}
+                onValueChange={(value) => setTheme(value as "light" | "dark" | "system")}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select theme" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="light">Light</SelectItem>
+                  <SelectItem value="dark">Dark</SelectItem>
+                  <SelectItem value="system">System</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
             <div className="flex items-center justify-between">
               <Label htmlFor="animations">Enable Animations</Label>

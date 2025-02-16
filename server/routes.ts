@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertUserSchema, insertConversationSchema, insertMessageSchema } from "@shared/schema";
+import { insertUserSchema, insertConversationSchema, insertMessageSchema, insertAgentSchema } from "@shared/schema";
 import { z } from "zod";
 import OpenAI from "openai";
 
@@ -36,17 +36,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Agent routes
   app.post("/api/agents", async (req, res) => {
     try {
-      const { name, description, prompt } = req.body;
-      const agent = {
-        id: Date.now(),
-        name,
-        description,
-        prompt,
-        createdAt: new Date()
-      };
-
+      const agentData = insertAgentSchema.parse(req.body);
+      const agent = await storage.createAgent(agentData);
       res.status(201).json({ agent });
     } catch (error: any) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ error: error.message });
+      }
       res.status(500).json({ 
         error: "Failed to create agent",
         details: error.message 
@@ -54,23 +50,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/agents", (_req, res) => {
-    const agents = [
-      { 
-        id: 1, 
-        name: "General Assistant", 
-        description: "A helpful AI assistant for general tasks",
-        createdAt: new Date()
-      },
-      { 
-        id: 2, 
-        name: "Code Helper", 
-        description: "Specialized in programming assistance",
-        createdAt: new Date()
-      }
-    ];
+  app.get("/api/agents", async (_req, res) => {
+    try {
+      const agents = await storage.getAgents();
+      res.json({ agents });
+    } catch (error: any) {
+      res.status(500).json({ 
+        error: "Failed to fetch agents",
+        details: error.message 
+      });
+    }
+  });
 
-    res.json({ agents });
+  app.get("/api/agents/:id", async (req, res) => {
+    try {
+      const agent = await storage.getAgent(parseInt(req.params.id));
+      if (!agent) {
+        return res.status(404).json({ error: "Agent not found" });
+      }
+      res.json({ agent });
+    } catch (error: any) {
+      res.status(500).json({ 
+        error: "Failed to fetch agent",
+        details: error.message 
+      });
+    }
   });
 
   // Conversation routes

@@ -1,5 +1,5 @@
-import { users, conversations, messages } from "@shared/schema";
-import type { User, InsertUser, Conversation, InsertConversation, Message, InsertMessage } from "@shared/schema";
+import { users, conversations, messages, agents } from "@shared/schema";
+import type { User, InsertUser, Conversation, InsertConversation, Message, InsertMessage, Agent, InsertAgent } from "@shared/schema";
 import { db } from "./db";
 import { eq } from "drizzle-orm";
 
@@ -17,6 +17,11 @@ export interface IStorage {
   // Message operations
   getMessages(conversationId: number): Promise<Message[]>;
   createMessage(message: InsertMessage): Promise<Message>;
+
+  // Agent operations
+  getAgents(): Promise<Agent[]>;
+  getAgent(id: number): Promise<Agent | undefined>;
+  createAgent(agent: InsertAgent): Promise<Agent>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -76,6 +81,30 @@ export class DatabaseStorage implements IStorage {
       .values(message)
       .returning();
     return newMessage;
+  }
+
+  // Agent operations
+  async getAgents(): Promise<Agent[]> {
+    return db
+      .select()
+      .from(agents)
+      .orderBy(agents.createdAt);
+  }
+
+  async getAgent(id: number): Promise<Agent | undefined> {
+    const [agent] = await db
+      .select()
+      .from(agents)
+      .where(eq(agents.id, id));
+    return agent;
+  }
+
+  async createAgent(agent: InsertAgent): Promise<Agent> {
+    const [newAgent] = await db
+      .insert(agents)
+      .values(agent)
+      .returning();
+    return newAgent;
   }
 }
 
