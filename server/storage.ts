@@ -1,111 +1,59 @@
-import { users, conversations, messages, agents } from "@shared/schema";
-import type { User, InsertUser, Conversation, InsertConversation, Message, InsertMessage, Agent, InsertAgent } from "@shared/schema";
-import { db } from "./db";
-import { eq } from "drizzle-orm";
+// server/storage.ts
+import { User, Agent, Conversation } from "../shared/models.js";
+import mongoose from "mongoose";
 
-export interface IStorage {
-  // User operations
-  getUser(id: number): Promise<User | undefined>;
-  getUserByUsername(username: string): Promise<User | undefined>;
-  createUser(user: InsertUser): Promise<User>;
-
-  // Conversation operations
-  getConversations(userId: number): Promise<Conversation[]>;
-  getConversation(id: number): Promise<Conversation | undefined>;
-  createConversation(conversation: InsertConversation): Promise<Conversation>;
-
-  // Message operations
-  getMessages(conversationId: number): Promise<Message[]>;
-  createMessage(message: InsertMessage): Promise<Message>;
-
-  // Agent operations
-  getAgents(): Promise<Agent[]>;
-  getAgent(id: number): Promise<Agent | undefined>;
-  createAgent(agent: InsertAgent): Promise<Agent>;
+// Users
+export async function createUser(data: { username: string; password: string; }) {
+  const user = new User(data);
+  return user.save();
 }
 
-export class DatabaseStorage implements IStorage {
-  // User operations
-  async getUser(id: number): Promise<User | undefined> {
-    const [user] = await db.select().from(users).where(eq(users.id, id));
-    return user;
-  }
-
-  async getUserByUsername(username: string): Promise<User | undefined> {
-    const [user] = await db.select().from(users).where(eq(users.username, username));
-    return user;
-  }
-
-  async createUser(insertUser: InsertUser): Promise<User> {
-    const [user] = await db.insert(users).values(insertUser).returning();
-    return user;
-  }
-
-  // Conversation operations
-  async getConversations(userId: number): Promise<Conversation[]> {
-    return db
-      .select()
-      .from(conversations)
-      .where(eq(conversations.userId, userId))
-      .orderBy(conversations.updatedAt);
-  }
-
-  async getConversation(id: number): Promise<Conversation | undefined> {
-    const [conversation] = await db
-      .select()
-      .from(conversations)
-      .where(eq(conversations.id, id));
-    return conversation;
-  }
-
-  async createConversation(conversation: InsertConversation): Promise<Conversation> {
-    const [newConversation] = await db
-      .insert(conversations)
-      .values(conversation)
-      .returning();
-    return newConversation;
-  }
-
-  // Message operations
-  async getMessages(conversationId: number): Promise<Message[]> {
-    return db
-      .select()
-      .from(messages)
-      .where(eq(messages.conversationId, conversationId))
-      .orderBy(messages.createdAt);
-  }
-
-  async createMessage(message: InsertMessage): Promise<Message> {
-    const [newMessage] = await db
-      .insert(messages)
-      .values(message)
-      .returning();
-    return newMessage;
-  }
-
-  // Agent operations
-  async getAgents(): Promise<Agent[]> {
-    return db
-      .select()
-      .from(agents)
-      .orderBy(agents.createdAt);
-  }
-
-  async getAgent(id: number): Promise<Agent | undefined> {
-    const [agent] = await db
-      .select()
-      .from(agents)
-      .where(eq(agents.id, id));
-    return agent;
-  }
-
-  async createAgent(agent: InsertAgent): Promise<Agent> {
-    const [newAgent] = await db
-      .insert(agents)
-      .values(agent)
-      .returning();
-    return newAgent;
-  }
+export async function getUserById(id: string) {
+  return User.findById(id).exec();
 }
 
-export const storage = new DatabaseStorage();
+// Agents
+export async function createAgent(data: { name: string; description: string; prompt: string; userId: string; }) {
+  const agent = new Agent({ ...data, userId: new mongoose.Types.ObjectId(data.userId) });
+  return agent.save();
+}
+
+export async function getAgents() {
+  return Agent.find().exec();
+}
+
+export async function getAgent(id: string) {
+  return Agent.findById(id).exec();
+}
+
+// Conversations
+export async function createConversation(data: {
+  title: string;
+  userId: string;
+  agentId: string;
+  messages: { content: string; isUser: boolean; timestamp?: Date }[];
+}) {
+  const conversation = new Conversation({
+    ...data,
+    userId: new mongoose.Types.ObjectId(data.userId),
+    agentId: new mongoose.Types.ObjectId(data.agentId),
+  });
+  return conversation.save();
+}
+
+export async function getConversations(userId: string) {
+  return Conversation.find({ userId: new mongoose.Types.ObjectId(userId) }).exec();
+}
+
+export async function addMessageToConversation(conversationId: string, message: { content: string; isUser: boolean; timestamp?: Date }) {
+  return Conversation.findByIdAndUpdate(
+    conversationId,
+    { $push: { messages: { ...message, timestamp: message.timestamp || new Date() } } },
+    { new: true }
+  ).exec();
+}
+
+export async function getMessages(conversationId: string) {
+  const conv = await Conversation.findById(conversationId).exec();
+  return conv ? conv.messages : [];
+}

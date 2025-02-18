@@ -4,7 +4,7 @@ import { queryClient } from "./lib/queryClient";
 import { Toaster } from "@/components/ui/toaster";
 import { useTheme } from "@/lib/theme";
 import { useEffect } from "react";
-import Sidebar from "@/components/layout/Sidebar";
+import Sidebar from "@/layout/Sidebar";
 import Chat from "@/pages/Chat";
 import Agents from "@/pages/Agents";
 import Settings from "@/pages/Settings";

@@ -5,6 +5,7 @@ import * as schema from "@shared/schema";
 import dotenv from 'dotenv'
 
 dotenv.config()
+
 neonConfig.webSocketConstructor = ws;
 
 if (!process.env.DATABASE_URL) {
